@@ -1,8 +1,28 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Drawing;
+using System.Runtime.InteropServices;
 using VkKatzi;
 
 internal static class Program
 {
+    private static Vertex[] _verticesLeft =
+    {
+        new() { X = 0.5f, Y = -1.0f, R = 1.0f, A = 1.0f },
+        new() { X = 1.0f, Y = 1.0f, G = 1.0f, A = 1.0f },
+        new() { X = 0.0f, Y = 1.0f, B = 1.0f, A = 1.0f },
+    };
+
+    private static Vertex[] _verticesRight =
+    {
+        new() { X = -0.5f, Y = -1.0f, R = 1.0f, A = 1.0f },
+        new() { X = 0.0f, Y = 1.0f, G = 1.0f, A = 1.0f },
+        new() { X = -1.0f, Y = 1.0f, B = 1.0f, A = 1.0f },
+    };
+
+    private static ushort[] indices =
+    {
+        0, 1, 2
+    };
+
     private static void Main(string[] args)
     {
         nint window = VKK.CreateWindow(800, 600, "Katzi lel");
@@ -11,18 +31,32 @@ internal static class Program
         {
             PresentMode = PresentMode.Mailbox,
             ImageBufferSize = 3,
-            EnableValidationLayers = false,
-            VerboseLogging = true
+            EnableValidationLayers = true,
+            LogWarnings = true
         };
 
-        PhysicalDeviceInfo deviceInfo = VKK.InitDevice(window, config);
+        InstanceInfo instanceInfo;
+        if (VKK.InitInstance(window, config, out instanceInfo) != Result.Success)
+            throw new Exception("Failed to initialize Instance");
 
-        if (!deviceInfo.Success)
-            throw new Exception("Failed to initialize Device");
+        Console.WriteLine($"Using Vulkan version {instanceInfo.VersionMajor}.{instanceInfo.VersionMinor}.{instanceInfo.VersionPatch}");
 
-        Console.WriteLine($"[GPU]: Name: {deviceInfo.Name}, Type: {Enum.GetName(deviceInfo.DeviceType)}");
+        PhysicalDeviceInfo[] devices = new PhysicalDeviceInfo[8];
+        uint deviceCount = VKK.EnumeratePhysicalDevices(devices, 8);
 
-        Uniform timeUniform = VKK.CreateUniform(0, sizeof(float), ShaderStage.Vertex);
+        for (int i = 0; i < deviceCount; i++)
+        {
+            Console.WriteLine($"[Device #{i}] {devices[i].Name}");
+        }
+
+
+        PhysicalDeviceInfo deviceInfo;
+        if (VKK.InitDevice(0, out deviceInfo) != Result.Success)
+            throw new Exception("Failed to initialize device");
+
+        Console.WriteLine($"[GPU] Name: {deviceInfo.Name}, Type: {Enum.GetName(deviceInfo.DeviceType)}");
+
+        UniformHandle timeUniform = VKK.CreateUniform(0, sizeof(float), ShaderStage.Vertex);
 
         PushConstantRange pushConstantRange = new()
         {
@@ -31,24 +65,52 @@ internal static class Program
             Size = sizeof(float) * 18
         };
 
-        if (!VKK.InitPipeline(pushConstantRange))
+        if (VKK.InitPipeline(pushConstantRange) != Result.Success)
             throw new Exception("Failed to initialize Pipeline");
         
-        Vertex[] vertices = {
-            new() { X = 0, Y = -1, R = 1, A = 1 },
-            new() { X = 1, Y = 1, G = 1, A = 1 },
-            new() { X = -1, Y = 1, B = 1, A = 1 },
-        };
 
-        ushort[] indices =
+        VertexAttribute[] attributes =
         {
-            0, 1, 2
+            new() { Location = 0, Format = VertexFormat.Float2, Offset = (uint)Marshal.OffsetOf<Vertex>("X")},
+            new() { Location = 1, Format = VertexFormat.Float4, Offset = (uint)Marshal.OffsetOf<Vertex>("R")}
         };
 
-        Buffer vertexBuffer = VKK.CreateBuffer((nuint)Marshal.SizeOf<Vertex>() * 3, BufferUsage.Vertex);
-        VKK.WriteBuffer(vertexBuffer, vertices);
 
-        Buffer indexBuffer = VKK.CreateBuffer((nuint)Marshal.SizeOf<ushort>() * 3, BufferUsage.Index);
+        PipelineDescription pipelineDescription;
+        PipelineDescription solidPipelineDescription;
+
+        unsafe
+        {
+            fixed (VertexAttribute* ptr = attributes)
+            {
+                pipelineDescription = new()
+                {
+                    ShaderPaths = new() { VertexShaderPath = "shader/compiled/vert.spv", FragmentShaderPath = "shader/compiled/frag.spv" },
+                    VertexAttributes = ptr,
+                    AttributeCount = 2,
+                    VertexStride = (uint)Marshal.SizeOf<Vertex>()
+                };
+
+                solidPipelineDescription = new()
+                {
+                    ShaderPaths = new() { VertexShaderPath = "shader/compiled/vert.spv", FragmentShaderPath = "shader/compiled/fragSolid.spv" },
+                    VertexAttributes = ptr,
+                    AttributeCount = 2,
+                    VertexStride = (uint)Marshal.SizeOf<Vertex>()
+                };
+            }
+        }
+
+        PipelineHandle pipeline = VKK.CreatePipeline(pipelineDescription);
+        PipelineHandle solidPipeline = VKK.CreatePipeline(solidPipelineDescription);
+
+        BufferHandle vertexBuffer = VKK.CreateBuffer((nuint)Marshal.SizeOf<Vertex>() * 3, BufferUsage.Vertex);
+        VKK.WriteBuffer(vertexBuffer, _verticesLeft);
+
+        BufferHandle solidVertexBuffer = VKK.CreateBuffer((nuint)Marshal.SizeOf<Vertex>() * 3, BufferUsage.Vertex);
+        VKK.WriteBuffer(solidVertexBuffer, _verticesRight);
+
+        BufferHandle indexBuffer = VKK.CreateBuffer((nuint)Marshal.SizeOf<ushort>() * 3, BufferUsage.Index);
         VKK.WriteBuffer(indexBuffer, indices);
 
         float elapsedTime = 0;
@@ -86,16 +148,21 @@ internal static class Program
 
             VKK.SetPushConstantData(pushConstantData);
 
-            VKK.Draw(vertexBuffer, 3, indexBuffer, 3);
+            VKK.Draw(pipeline, vertexBuffer, 3, indexBuffer, 3);
+            VKK.Draw(solidPipeline, solidVertexBuffer, 3, indexBuffer, 3);
 
             VKK.PollEvents();
-            VKK.Present();
+            VKK.Present(Color.CornflowerBlue);
         }
 
         VKK.DestroyBuffer(vertexBuffer);
+        VKK.DestroyBuffer(solidVertexBuffer);
         VKK.DestroyBuffer(indexBuffer);
 
         VKK.DestroyUniform(timeUniform);
+
+        VKK.DestroyPipeline(pipeline);
+        VKK.DestroyPipeline(solidPipeline);
 
         VKK.End();
         VKK.TerminateWindowing();

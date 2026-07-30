@@ -1,3 +1,5 @@
+namespace VkKatzi;
+
 public enum ShaderStage
 {
     Vertex,
