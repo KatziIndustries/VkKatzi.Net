@@ -5,35 +5,51 @@ namespace VkKatzi;
 
 public static class VKK
 {
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateWindow")]
-    public static extern Window CreateWindow(int width, int height, string title);
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_WindowShouldClose")]
-    public static extern bool WindowShouldClose(Window window);
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_GetTime")]
-    public static extern double GetTime();
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_GetFramebufferSize")]
-    public static extern void GetFramebufferSize(Window window, out int width, out int height);
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_GetMouseButton")]
-    public static extern int GetMouseButton(Window window, int button);
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_GetCursorPosition")]
-    public static extern void GetCursorPosition(Window window, out double x, out double y);
-
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_EnumeratePhysicalDevices")]
     public static extern uint EnumeratePhysicalDevices(PhysicalDeviceInfo[] devices, uint maxDevices);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitInstance")]
-    public static extern Result InitInstance(Window window, VkKatziConfig config, out InstanceInfo instanceInfo);
+    private static extern Result VKK_InitInstance(Internal_VKKConfig config, out InstanceInfo instanceInfo);
+
+    public static Result InitInstance(VKKConfig config, out InstanceInfo instanceInfo)
+    {
+        IntPtr[] strPointers = new nint[config.RequiredExtensions.Length];
+
+        for (int i = 0; i < config.RequiredExtensions.Length; i++)
+        {
+            strPointers[i] = Marshal.StringToHGlobalAnsi(config.RequiredExtensions[i]);
+        }
+
+        IntPtr arrayPtr = Marshal.AllocHGlobal(IntPtr.Size * strPointers.Length);
+        Marshal.Copy(strPointers, 0, arrayPtr, strPointers.Length);
+
+        Internal_VKKConfig internalConfig = new()
+        {
+            PresentMode = config.PresentMode,
+            ImageBufferSize = config.ImageBufferSize,
+            EnableValidationLayers = config.EnableValidationLayers,
+            LogWarnings = config.LogWarnings,
+            RequiredExtensions = arrayPtr,
+            RequiredExtensionsCount = config.RequiredExtensionsCount
+        };
+
+        Result result = VKK_InitInstance(internalConfig, out instanceInfo);
+
+        foreach (IntPtr ptr in strPointers)
+        {
+            Marshal.FreeHGlobal(ptr);
+        }
+
+        Marshal.FreeHGlobal(arrayPtr);
+
+        return result;
+    }
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitDevice")]
     public static extern Result InitDevice(uint deviceIndex, out PhysicalDeviceInfo deviceInfo);
 
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitPipeline")]
-    public static extern Result InitPipeline(PushConstantRange pushConstantRange);
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitRenderer")]
+    public static extern Result InitRenderer(RendererConfig rendererConfig);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_Present")]
     private static extern void VKK_Present(VKK_Color color);
@@ -46,12 +62,6 @@ public static class VKK
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_End")]
     public static extern void End();
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_TerminateWindowing")]
-    public static extern void TerminateWindowing();
-
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_PollEvents")]
-    public static extern void PollEvents();
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateBuffer")]
     public static extern BufferHandle CreateBuffer(nuint size, BufferUsage usage);
@@ -106,4 +116,10 @@ public static class VKK
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreatePipeline")]
     public static extern PipelineHandle CreatePipeline(PipelineDescription pipelineDescription);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_SetSurface")]
+    public static extern void SetSurface(SurfaceHandle surface, uint width, uint height);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_SetFramebufferSize")]
+    public static extern void SetFramebufferSize(uint width, uint height);
 }

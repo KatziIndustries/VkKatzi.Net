@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using System.Runtime.InteropServices;
 using VkKatzi;
+using VkKatzi.SDL3;
+using SDL3;
 
 internal static class Program
 {
@@ -23,23 +25,48 @@ internal static class Program
         0, 1, 2
     };
 
+    private static int _lastWindowWidth;
+    private static int _lastWindowHeight;
+
+    private static int _windowWidth;
+    private static int _windowHeight;
+
     private static void Main(string[] args)
     {
-        nint window = VKK.CreateWindow(800, 600, "Katzi lel");
+        if (!SDL.Init(SDL.InitFlags.Video))
+            throw new Exception($"Failed to initialize SDL: {SDL.GetError()}");
 
-        VkKatziConfig config = new()
+        nint window = SDL.CreateWindow("VkKatzi C#", 800, 600, SDL.WindowFlags.Vulkan | SDL.WindowFlags.Resizable);
+
+        string[]? requiredExtensions = SDL.VulkanGetInstanceExtensions(out uint requiredExtensionsCount);
+
+        if (requiredExtensions == null)
+            throw new Exception("Failed to get required instance extensions");
+
+        VKKConfig config = new()
         {
             PresentMode = PresentMode.Mailbox,
             ImageBufferSize = 3,
-            EnableValidationLayers = true,
-            LogWarnings = true
+            EnableValidationLayers = false,
+            LogWarnings = true,
+            RequiredExtensions = requiredExtensions,
+            RequiredExtensionsCount = requiredExtensionsCount
         };
 
         InstanceInfo instanceInfo;
-        if (VKK.InitInstance(window, config, out instanceInfo) != Result.Success)
+        if (VKK.InitInstance(config, out instanceInfo) != Result.Success)
             throw new Exception("Failed to initialize Instance");
 
-        Console.WriteLine($"Using Vulkan version {instanceInfo.VersionMajor}.{instanceInfo.VersionMinor}.{instanceInfo.VersionPatch}");
+        Console.WriteLine($"[Vulkan] Version: {instanceInfo.VersionMajor}.{instanceInfo.VersionMinor}.{instanceInfo.VersionPatch}");
+
+        SurfaceHandle surface;
+        VKK_SDL.CreateSurface(window, instanceInfo.Instance, out surface);
+
+        SDL.GetWindowSize(window, out _windowWidth, out _windowHeight);
+        VKK.SetSurface(surface, (uint)_windowWidth, (uint)_windowHeight);
+
+        _lastWindowWidth = _windowWidth;
+        _lastWindowHeight = _windowHeight;
 
         PhysicalDeviceInfo[] devices = new PhysicalDeviceInfo[8];
         uint deviceCount = VKK.EnumeratePhysicalDevices(devices, 8);
@@ -48,7 +75,6 @@ internal static class Program
         {
             Console.WriteLine($"[Device #{i}] {devices[i].Name}");
         }
-
 
         PhysicalDeviceInfo deviceInfo;
         if (VKK.InitDevice(0, out deviceInfo) != Result.Success)
@@ -65,7 +91,12 @@ internal static class Program
             Size = sizeof(float) * 18
         };
 
-        if (VKK.InitPipeline(pushConstantRange) != Result.Success)
+        RendererConfig rendererConfig = new()
+        {
+            PushConstantRange = pushConstantRange,
+        };
+
+        if (VKK.InitRenderer(rendererConfig) != Result.Success)
             throw new Exception("Failed to initialize Pipeline");
         
 
@@ -116,12 +147,22 @@ internal static class Program
         float elapsedTime = 0;
         float frameTimeTimer = 0;
 
-        double lastFrameTime = VKK.GetTime();
+        ulong lastFrameTime = SDL.GetPerformanceCounter();
 
-        while (!VKK.WindowShouldClose(window))
+        bool running = true;
+        while (running)
         {
-            double currentTime = VKK.GetTime();
-            double deltaTime = currentTime - lastFrameTime;
+            
+            while (SDL.PollEvent(out SDL.Event e))
+            {
+                if (e.Type == (uint)SDL.EventType.Quit)
+                {
+                    running = false;
+                }
+            }
+
+            ulong currentTime = SDL.GetPerformanceCounter();
+            double deltaTime = (double)(currentTime - lastFrameTime) / SDL.GetPerformanceFrequency();
             lastFrameTime = currentTime;
 
             elapsedTime += (float)deltaTime;
@@ -133,13 +174,20 @@ internal static class Program
                 frameTimeTimer = 0;
             }
 
-            double cursorX, cursorY;
-            VKK.GetCursorPosition(window, out cursorX, out cursorY);
+            SDL.GetWindowSize(window, out _windowWidth, out _windowHeight);
+            if (_lastWindowWidth != _windowWidth || _lastWindowHeight != _windowHeight)
+            {
+                VKK.SetFramebufferSize((uint)_windowWidth, (uint)_windowHeight);
 
-            VKK.GetFramebufferSize(window, out int windowWidth, out int windowHeight);
+                _lastWindowWidth = _windowWidth;
+                _lastWindowHeight = _windowHeight;
+            }
 
-            float[] matrix = CreateOrthoMatrix(windowWidth, windowHeight);
-            float[] cursorPosition = [(float)cursorX, (float)cursorY];
+            float cursorX, cursorY;
+            SDL.GetMouseState(out cursorX, out cursorY);
+
+            float[] matrix = CreateOrthoMatrix(_windowWidth, _windowHeight);
+            float[] cursorPosition = [cursorX, cursorY];
 
             float[] pushConstantData = new float[18];
 
@@ -151,7 +199,6 @@ internal static class Program
             VKK.Draw(pipeline, vertexBuffer, 3, indexBuffer, 3);
             VKK.Draw(solidPipeline, solidVertexBuffer, 3, indexBuffer, 3);
 
-            VKK.PollEvents();
             VKK.Present(Color.CornflowerBlue);
         }
 
@@ -165,7 +212,6 @@ internal static class Program
         VKK.DestroyPipeline(solidPipeline);
 
         VKK.End();
-        VKK.TerminateWindowing();
     }
 
     private static float[] CreateOrthoMatrix(float width, float height) 

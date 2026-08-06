@@ -15,4 +15,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SDL3-CS" Version="3.4.14" />
+  </ItemGroup>
+
 </Project>

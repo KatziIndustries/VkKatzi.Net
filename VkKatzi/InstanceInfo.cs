@@ -8,4 +8,5 @@ public struct InstanceInfo
     public uint VersionMajor;
     public uint VersionMinor;
     public uint VersionPatch;
+    public InstanceHandle Instance;
 }
