@@ -116,7 +116,8 @@ internal static class Program
             {
                 pipelineDescription = new()
                 {
-                    ShaderPaths = new() { VertexShaderPath = "shader/compiled/vert.spv", FragmentShaderPath = "shader/compiled/frag.spv" },
+                    VertexShaderPath = "shader/compiled/vert.spv",
+                    FragmentShaderPath = "shader/compiled/frag.spv",
                     VertexAttributes = ptr,
                     AttributeCount = 2,
                     VertexStride = (uint)Marshal.SizeOf<Vertex>()
@@ -124,7 +125,8 @@ internal static class Program
 
                 solidPipelineDescription = new()
                 {
-                    ShaderPaths = new() { VertexShaderPath = "shader/compiled/vert.spv", FragmentShaderPath = "shader/compiled/fragSolid.spv" },
+                    VertexShaderPath = "shader/compiled/vert.spv",
+                    FragmentShaderPath = "shader/compiled/fragSolid.spv",
                     VertexAttributes = ptr,
                     AttributeCount = 2,
                     VertexStride = (uint)Marshal.SizeOf<Vertex>()
