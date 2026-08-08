@@ -1,4 +1,6 @@
 using System.Drawing;
+using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace VkKatzi;
@@ -67,10 +69,33 @@ public static class VKK
     public static extern BufferHandle CreateBuffer(nuint size, BufferUsage usage);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateUniform")]
-    public static extern UniformHandle CreateUniform(uint binding, nuint size, ShaderStage shaderStage);
+    public static extern UniformHandle CreateUniform(nuint size, ShaderStage shaderStage);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_BindUniform")]
+    public static extern void BindUniform(uint binding, UniformHandle uniform);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTexture")]
+    public static extern TextureHandle CreateTexture(string path);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTextureFromPixels")]
+    private static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height);
+
+    public static unsafe void CreateTextureFromPixels<T>(T[] pixels, uint width, uint height) where T : unmanaged
+    {
+        fixed (T* ptr = pixels)
+        {
+            VKK_CreateTextureFromPixels(ptr, width, height);
+        }
+    }
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_BindTexture")]
+    public static extern void BindTexture(uint binding, TextureHandle texture);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_DestroyBuffer")]
     public static extern void DestroyBuffer(BufferHandle buffer);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_DestroyTexture")]
+    public static extern void DestroyTexture(TextureHandle texture);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_DestroyUniform")]
     public static extern void DestroyUniform(UniformHandle uniform);
@@ -122,4 +147,7 @@ public static class VKK
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_SetFramebufferSize")]
     public static extern void SetFramebufferSize(uint width, uint height);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateDescriptorSetLayout")]
+    public static extern Result CreateDescriptorSetLayout(DescriptorSetLayoutBinding[] bindings, uint bindingsCount);
 }

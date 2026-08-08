@@ -15,5 +15,6 @@ public enum Result
     CommandPoolCreationFailed,
     CommandBufferCreationFailed,
     SyncObjectsCreationFailed,
-    DescriptorPoolCreationFailed
+    DescriptorPoolCreationFailed,
+    WrongExecutionOrder
 }
