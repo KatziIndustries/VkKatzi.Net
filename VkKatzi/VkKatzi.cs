@@ -1,6 +1,4 @@
 using System.Drawing;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace VkKatzi;
@@ -11,7 +9,7 @@ public static class VKK
     public static extern uint EnumeratePhysicalDevices(PhysicalDeviceInfo[] devices, uint maxDevices);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitInstance")]
-    private static extern Result VKK_InitInstance(Internal_VKKConfig config, out InstanceInfo instanceInfo);
+    internal static extern Result VKK_InitInstance(Internal_VKKConfig config, out InstanceInfo instanceInfo);
 
     public static Result InitInstance(VKKConfig config, out InstanceInfo instanceInfo)
     {
@@ -54,7 +52,7 @@ public static class VKK
     public static extern Result InitRenderer(RendererConfig rendererConfig);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_Present")]
-    private static extern void VKK_Present(VKK_Color color);
+    internal static extern void VKK_Present(VKK_Color color);
 
     public static void Present(Color color)
     {
@@ -78,7 +76,7 @@ public static class VKK
     public static extern TextureHandle CreateTexture(string path);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTextureFromPixels")]
-    private static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height);
+    internal static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height);
 
     public static unsafe void CreateTextureFromPixels<T>(T[] pixels, uint width, uint height) where T : unmanaged
     {
@@ -104,7 +102,7 @@ public static class VKK
     public static extern void DestroyPipeline(PipelineHandle uniform);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_WriteBuffer")]
-    private static extern unsafe void VKK_WriteBuffer(BufferHandle buffer, void* data, nuint size, nuint offset);
+    internal static extern unsafe void VKK_WriteBuffer(BufferHandle buffer, void* data, nuint size, nuint offset);
 
     public static unsafe void WriteBuffer<T>(BufferHandle buffer, T[] data, nuint offset = 0) where T : unmanaged
     {
@@ -115,7 +113,7 @@ public static class VKK
     }
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_WriteUniform")]
-    private static extern unsafe void VKK_WriteUniform(UniformHandle uniform, void* data, nuint size, nuint offset);
+    internal static extern unsafe void VKK_WriteUniform(UniformHandle uniform, void* data, nuint size, nuint offset);
 
     public static unsafe void WriteUniform<T>(UniformHandle uniform, T[] data, nuint offset = 0) where T : unmanaged
     {
@@ -128,8 +126,11 @@ public static class VKK
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_Draw")]
     public static extern void Draw(PipelineHandle pipeline, BufferHandle vertexBuffer, uint vertexCount, BufferHandle indexBuffer, uint indexCount);
 
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_DrawInstanced")]
+    public static extern void DrawInstanced(PipelineHandle pipeline, BufferHandle vertexBuffer, uint vertexCount, BufferHandle indexBuffer, uint indexCount, BufferHandle instanceBuffer, uint instanceCount);
+
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_SetPushConstantData")]
-    private static extern unsafe void VKK_SetPushConstantData(void* data);
+    internal static extern unsafe void VKK_SetPushConstantData(void* data);
 
     public static unsafe void SetPushConstantData<T>(T[] data) where T : unmanaged
     {
@@ -140,7 +141,40 @@ public static class VKK
     }
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreatePipeline")]
-    public static extern PipelineHandle CreatePipeline(PipelineDescription pipelineDescription);
+    internal static extern PipelineHandle VKK_CreatePipeline(Internal_PipelineDescription pipelineDescription);
+
+    public static PipelineHandle CreatePipeline(PipelineDescription pipelineDescription)
+    {
+        Internal_PipelineDescription desc = new()
+        {
+            VertexShaderPath = pipelineDescription.VertexShaderPath,
+            FragmentShaderPath = pipelineDescription.FragmentShaderPath,
+            AttributeCount = pipelineDescription.AttributeCount,
+            VertexStride = pipelineDescription.VertexStride,
+            InstanceStride = pipelineDescription.InstanceStride,
+            InstanceAttributeCount = pipelineDescription.InstanceAttributeCount
+        };
+
+        if (pipelineDescription.AttributeCount > 0)
+        {
+            unsafe
+            {
+                fixed (VertexAttribute* ptr = pipelineDescription.VertexAttributes)
+                desc.VertexAttributes = ptr;
+            }
+        }
+
+        if (pipelineDescription.InstanceAttributeCount > 0)
+        {
+            unsafe
+            {
+                fixed (VertexAttribute* ptr = pipelineDescription.InstanceAttributes)
+                desc.InstanceAttributes = ptr;
+            }
+        }
+
+        return VKK_CreatePipeline(desc);
+    }
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_SetSurface")]
     public static extern void SetSurface(SurfaceHandle surface, uint width, uint height);
