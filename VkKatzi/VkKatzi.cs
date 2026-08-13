@@ -73,16 +73,16 @@ public static class VKK
     public static extern void BindUniform(uint binding, UniformHandle uniform);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTexture")]
-    public static extern TextureHandle CreateTexture(string path);
+    public static extern TextureHandle CreateTexture(string path, SamplerFilter samplerFilter);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTextureFromPixels")]
-    internal static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height);
+    internal static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height, SamplerFilter samplerFilter);
 
-    public static unsafe void CreateTextureFromPixels<T>(T[] pixels, uint width, uint height) where T : unmanaged
+    public static unsafe void CreateTextureFromPixels<T>(T[] pixels, uint width, uint height, SamplerFilter samplerFilter) where T : unmanaged
     {
         fixed (T* ptr = pixels)
         {
-            VKK_CreateTextureFromPixels(ptr, width, height);
+            VKK_CreateTextureFromPixels(ptr, width, height, samplerFilter);
         }
     }
 
