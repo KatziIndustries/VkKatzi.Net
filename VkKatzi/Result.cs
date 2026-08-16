@@ -16,5 +16,6 @@ public enum Result
     CommandBufferCreationFailed,
     SyncObjectsCreationFailed,
     DescriptorPoolCreationFailed,
-    WrongExecutionOrder
+    WrongExecutionOrder,
+    DepthResourceCreationFailed
 }

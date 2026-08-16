@@ -15,4 +15,6 @@ public struct PipelineDescription
     public uint InstanceStride;
     public VertexAttribute[] InstanceAttributes;
     public uint InstanceAttributeCount;
+
+    public Rasterizer Rasterizer;
 }

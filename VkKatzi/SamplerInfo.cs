@@ -8,4 +8,7 @@ public struct SamplerInfo
     public SamplerFilter Filter;
     public SamplerAddressMode AddressMode;
     public SamplerBorderColor BorderColor;
+
+    public bool EnableAnisotropy;
+    public float MaxAnisotropy;
 }
