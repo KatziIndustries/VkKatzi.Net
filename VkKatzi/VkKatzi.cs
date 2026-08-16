@@ -130,10 +130,10 @@ public static class VKK
     }
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_Draw")]
-    public static extern void Draw(PipelineHandle pipeline, BufferHandle vertexBuffer, uint vertexCount, BufferHandle indexBuffer, uint indexCount);
+    public static extern void Draw(PipelineHandle pipeline, BufferHandle vertexBuffer, BufferHandle indexBuffer, uint indexCount);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_DrawInstanced")]
-    public static extern void DrawInstanced(PipelineHandle pipeline, BufferHandle vertexBuffer, uint vertexCount, BufferHandle indexBuffer, uint indexCount, BufferHandle instanceBuffer, uint instanceCount);
+    public static extern void DrawInstanced(PipelineHandle pipeline, BufferHandle vertexBuffer, BufferHandle indexBuffer, uint indexCount, BufferHandle instanceBuffer, uint instanceCount);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_SetPushConstantData")]
     internal static extern unsafe void VKK_SetPushConstantData(void* data);
