@@ -1,6 +1,6 @@
 namespace VkKatzi;
 
-public enum CullMode
+public enum CullMode : int
 {
     None = 0,
     Front = 0x00000001,

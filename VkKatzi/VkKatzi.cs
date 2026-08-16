@@ -158,7 +158,8 @@ public static class VKK
             AttributeCount = pipelineDescription.AttributeCount,
             VertexStride = pipelineDescription.VertexStride,
             InstanceStride = pipelineDescription.InstanceStride,
-            InstanceAttributeCount = pipelineDescription.InstanceAttributeCount
+            InstanceAttributeCount = pipelineDescription.InstanceAttributeCount,
+            Rasterizer = pipelineDescription.Rasterizer
         };
 
         if (pipelineDescription.AttributeCount > 0)
@@ -166,7 +167,7 @@ public static class VKK
             unsafe
             {
                 fixed (VertexAttribute* ptr = pipelineDescription.VertexAttributes)
-                desc.VertexAttributes = ptr;
+                    desc.VertexAttributes = ptr;
             }
         }
 
@@ -175,7 +176,7 @@ public static class VKK
             unsafe
             {
                 fixed (VertexAttribute* ptr = pipelineDescription.InstanceAttributes)
-                desc.InstanceAttributes = ptr;
+                    desc.InstanceAttributes = ptr;
             }
         }
 
