@@ -159,7 +159,8 @@ public static class VKK
             VertexStride = pipelineDescription.VertexStride,
             InstanceStride = pipelineDescription.InstanceStride,
             InstanceAttributeCount = pipelineDescription.InstanceAttributeCount,
-            Rasterizer = pipelineDescription.Rasterizer
+            Rasterizer = pipelineDescription.Rasterizer,
+            EnableDepthTesting = pipelineDescription.EnableDepthTesting
         };
 
         if (pipelineDescription.AttributeCount > 0)

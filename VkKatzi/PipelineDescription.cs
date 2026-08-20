@@ -17,4 +17,5 @@ public struct PipelineDescription
     public uint InstanceAttributeCount;
 
     public Rasterizer Rasterizer;
+    public bool EnableDepthTesting;
 }

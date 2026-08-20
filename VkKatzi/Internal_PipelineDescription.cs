@@ -17,4 +17,5 @@ internal unsafe struct Internal_PipelineDescription
     public uint InstanceAttributeCount;
 
     public Rasterizer Rasterizer;
+    public bool EnableDepthTesting;
 }
