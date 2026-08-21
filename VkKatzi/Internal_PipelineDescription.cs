@@ -18,4 +18,5 @@ internal unsafe struct Internal_PipelineDescription
 
     public Rasterizer Rasterizer;
     public bool EnableDepthTesting;
+    public CompareOp DepthCompareOp;
 }
