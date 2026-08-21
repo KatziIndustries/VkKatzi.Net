@@ -5,12 +5,18 @@ namespace VkKatzi;
 
 public static class VKK
 {
+    /// <summary>
+    ///  Enumerates over all physical devices and returns the info about each one.
+    /// </summary>
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_EnumeratePhysicalDevices")]
     public static extern uint EnumeratePhysicalDevices(PhysicalDeviceInfo[] devices, uint maxDevices);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitInstance")]
     internal static extern Result VKK_InitInstance(Internal_VKKConfig config, out InstanceInfo instanceInfo);
 
+    /// <summary>
+    ///  Initializes the Vulkan instance.
+    /// </summary>
     public static Result InitInstance(VKKConfig config, out InstanceInfo instanceInfo)
     {
         IntPtr[] strPointers = new nint[config.RequiredExtensions.Length];
@@ -45,9 +51,15 @@ public static class VKK
         return result;
     }
 
+    /// <summary>
+    /// Initializes the specified device. Has to be called after VKK.InitInstance and VKK.EnumeratePhysicalDevices.
+    /// </summary>
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitDevice")]
     public static extern Result InitDevice(uint deviceIndex, out PhysicalDeviceInfo deviceInfo);
 
+    /// <summary>
+    /// Initializes the renderer. Has to be called after VKK.InitDevice
+    /// </summary>
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitRenderer")]
     public static extern Result InitRenderer(RendererConfig rendererConfig);
 
