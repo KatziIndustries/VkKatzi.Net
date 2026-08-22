@@ -90,9 +90,6 @@ public static class VKK
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_GetTextureSize")]
     public static extern void GetTextureSize(TextureHandle texture, out uint width, out uint height);
 
-    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTexture")]
-    public static extern TextureHandle CreateTexture(string path, ImageFormat textureFormat);
-
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTextureFromPixels")]
     internal static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height, ImageFormat textureFormat);
 
