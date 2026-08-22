@@ -93,11 +93,11 @@ public static class VKK
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateTextureFromPixels")]
     internal static unsafe extern TextureHandle VKK_CreateTextureFromPixels(void* data, uint width, uint height, ImageFormat textureFormat);
 
-    public static unsafe void CreateTextureFromPixels<T>(T[] pixels, uint width, uint height, ImageFormat textureFormat) where T : unmanaged
+    public static unsafe TextureHandle CreateTextureFromPixels<T>(T[] pixels, uint width, uint height, ImageFormat textureFormat) where T : unmanaged
     {
         fixed (T* ptr = pixels)
         {
-            VKK_CreateTextureFromPixels(ptr, width, height, textureFormat);
+            return VKK_CreateTextureFromPixels(ptr, width, height, textureFormat);
         }
     }
 
