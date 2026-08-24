@@ -2,12 +2,23 @@
 
   <PropertyGroup>
     <OutputType>library</OutputType>
-    <Version>1.0.0</Version>
+    <Version>1.0.3</Version>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <PropertyGroup Label="NuGet">
+	  <PackageId>VkKatzi.Net</PackageId>
+    <PackageVersion>1.0.3</PackageVersion>
+    <Authors>AaronoLW</Authors>
+    <Description>C# Bindings for the VkKatzi library</Description>
+    <Copyright>Copyright © 2026 AaronoLW</Copyright>
+    <RepositoryUrl>github.com/KatziIndustries/VkKatzi.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
 </Project>
