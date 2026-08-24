@@ -19,4 +19,8 @@ public struct PipelineDescription
     public Rasterizer Rasterizer;
     public bool EnableDepthTesting;
     public CompareOp DepthCompareOp;
+
+    public bool EnableBlending;
+    public BlendOp ColorBlendOp;
+    public BlendOp AlphaBlendOp;
 }
