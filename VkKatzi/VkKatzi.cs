@@ -10,7 +10,6 @@ public static class VKK
     /// </summary>
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_EnumeratePhysicalDevices")]
     public static extern uint EnumeratePhysicalDevices([Out] PhysicalDeviceInfo[] devices, uint maxDevices);
-
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitInstance")]
     internal static extern Result VKK_InitInstance(Internal_VKKConfig config, out InstanceInfo instanceInfo);
 

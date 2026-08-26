@@ -5,6 +5,6 @@ namespace VkKatzi;
 [StructLayout(LayoutKind.Sequential)]
 public struct PhysicalDeviceInfo
 {
-    public readonly PhysicalDeviceProperties Properties;
-    public readonly PhysicalDeviceFeatures Features;
+    public PhysicalDeviceProperties Properties;
+    public PhysicalDeviceFeatures Features;
 }
