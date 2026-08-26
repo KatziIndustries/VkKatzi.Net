@@ -9,7 +9,7 @@ public static class VKK
     ///  Enumerates over all physical devices and returns the info about each one.
     /// </summary>
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_EnumeratePhysicalDevices")]
-    public static extern uint EnumeratePhysicalDevices(PhysicalDeviceInfo[] devices, uint maxDevices);
+    public static extern uint EnumeratePhysicalDevices([Out] PhysicalDeviceInfo[] devices, uint maxDevices);
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_InitInstance")]
     internal static extern Result VKK_InitInstance(Internal_VKKConfig config, out InstanceInfo instanceInfo);
