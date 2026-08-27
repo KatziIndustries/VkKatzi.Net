@@ -71,6 +71,12 @@ public static class VKK
         VKK_Present(clearColor);
     }
 
+    public static void Present(float r, float g, float b, float a) 
+    {
+        VKK_Color clearColor = new() { R = r, B = b, G = g, A = a };
+        VKK_Present(clearColor);
+    }
+
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_End")]
     public static extern void End();
 
