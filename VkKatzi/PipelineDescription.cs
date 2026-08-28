@@ -23,4 +23,6 @@ public struct PipelineDescription
     public bool EnableBlending;
     public BlendOp ColorBlendOp;
     public BlendOp AlphaBlendOp;
+
+    public PrimitiveTopology PrimitiveTopology;
 }

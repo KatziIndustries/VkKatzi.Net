@@ -178,7 +178,8 @@ public static class VKK
             DepthCompareOp = pipelineDescription.DepthCompareOp,
             EnableBlending = pipelineDescription.EnableBlending,
             ColorBlendOp = pipelineDescription.ColorBlendOp,
-            AlphaBlendOp = pipelineDescription.AlphaBlendOp
+            AlphaBlendOp = pipelineDescription.AlphaBlendOp,
+            PrimitiveTopology = pipelineDescription.PrimitiveTopology
         };
 
         if (pipelineDescription.AttributeCount > 0)
@@ -210,4 +211,24 @@ public static class VKK
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateDescriptorSetLayout")]
     public static extern Result CreateDescriptorSetLayout(DescriptorSetLayoutBinding[] bindings, uint bindingsCount);
+
+    public enum Result
+    {
+        Success = 0,
+        InstanceCreationFailed,
+        SurfaceCreationFailed,
+        NoSuitableDevice,
+        InvalidDeviceIndex,
+        DeviceCreationFailed,
+        SwapchainCreationFailed,
+        RenderPassCreationFailed,
+        DescriptorSetLayoutCreationFailed,
+        FramebufferCreationFailed,
+        CommandPoolCreationFailed,
+        CommandBufferCreationFailed,
+        SyncObjectsCreationFailed,
+        DescriptorPoolCreationFailed,
+        WrongExecutionOrder,
+        DepthResourceCreationFailed
+    }
 }
