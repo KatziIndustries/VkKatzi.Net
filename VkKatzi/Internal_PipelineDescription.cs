@@ -5,8 +5,8 @@ namespace VkKatzi;
 [StructLayout(LayoutKind.Sequential)]
 internal unsafe struct Internal_PipelineDescription
 {
-    public string VertexShaderPath;
-    public string FragmentShaderPath;
+    public Internal_Shader VertexShader;
+    public Internal_Shader FragmentShader;
 
     public VertexAttribute* VertexAttributes;
     public uint AttributeCount;

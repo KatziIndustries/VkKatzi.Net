@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace VkKatzi;
 
@@ -165,10 +166,28 @@ public static class VKK
 
     public static PipelineHandle CreatePipeline(PipelineDescription pipelineDescription)
     {
+        //Internal_Shader vertexShader;
+        //byte[] vertexSpirv = pipelineDescription.VertexShader.Code;
+
+        //IntPtr vertexPtr = Marshal.AllocHGlobal(vertexSpirv.Length);
+        //Marshal.Copy(vertexSpirv, 0, vertexPtr, vertexSpirv.Length);
+
+        //vertexShader.Code = vertexPtr;
+        //vertexShader.CodeSize = (nuint)vertexSpirv.Length;
+
+        //Internal_Shader fragmentShader;
+        //byte[] fragmentSpirv = pipelineDescription.FragmentShader.Code;
+
+        //IntPtr fragmentPtr = Marshal.AllocHGlobal(fragmentSpirv.Length);
+        //Marshal.Copy(fragmentSpirv, 0, fragmentPtr, fragmentSpirv.Length);
+
+        //fragmentShader.Code = fragmentPtr;
+        //fragmentShader.CodeSize = (nuint)fragmentSpirv.Length;
+
         Internal_PipelineDescription desc = new()
         {
-            VertexShaderPath = pipelineDescription.VertexShaderPath,
-            FragmentShaderPath = pipelineDescription.FragmentShaderPath,
+            VertexShader = pipelineDescription.VertexShader.InternalShader,
+            FragmentShader = pipelineDescription.FragmentShader.InternalShader,
             AttributeCount = pipelineDescription.AttributeCount,
             VertexStride = pipelineDescription.VertexStride,
             InstanceStride = pipelineDescription.InstanceStride,
@@ -211,6 +230,29 @@ public static class VKK
 
     [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateDescriptorSetLayout")]
     public static extern Result CreateDescriptorSetLayout(DescriptorSetLayoutBinding[] bindings, uint bindingsCount);
+
+    [DllImport("vkkatzi", CallingConvention = CallingConvention.Cdecl, EntryPoint = "VKK_CreateShaderFromFile")]
+    private static extern Internal_Shader VKK_CreateShaderFromFile(string filePath);
+
+    public static Shader CreateShaderFromFile(string filePath)
+    {
+        Internal_Shader iShader = VKK_CreateShaderFromFile(filePath);
+
+        return new() { InternalShader = iShader };
+    }
+
+    public static Shader CreateShader(byte[] code)
+    {
+        IntPtr ptr = Marshal.AllocHGlobal(code.Length);
+        Marshal.Copy(code, 0, ptr, code.Length);
+
+        Internal_Shader shader = new() {
+            Code = ptr,
+            CodeSize = (nuint)code.Length
+        };
+
+        return new() { InternalShader = shader };
+    }
 
     public enum Result
     {

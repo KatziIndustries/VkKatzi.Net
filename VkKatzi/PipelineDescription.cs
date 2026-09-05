@@ -5,8 +5,8 @@ namespace VkKatzi;
 [StructLayout(LayoutKind.Sequential)]
 public struct PipelineDescription
 {
-    public string VertexShaderPath;
-    public string FragmentShaderPath;
+    public Shader VertexShader;
+    public Shader FragmentShader;
 
     public VertexAttribute[] VertexAttributes;
     public uint AttributeCount;
